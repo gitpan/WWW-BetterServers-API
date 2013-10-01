@@ -1,25 +1,9 @@
-Revision history for Perl extension WWW::BetterServers::API.
+Revision history for Perl module WWW::BetterServers::API
 
-commit 0166a2071058b4809cd99b12139fd072e8026421
-Author: Scott Wiersdorf <scott@betterservers.com>
-Date:   Fri Sep 27 14:05:43 2013 -0600
+0.04 2013-10-01
 
-    - version 0.03: uses Mojo::UserAgent
+    * Changes file conformant to CPAN::Changes
 
-commit 0f03a5211d67b28f3256bb3f067dda1aa80b80ac
-Author: Scott Wiersdorf <scott@betterlinux.com>
-Date:   Thu May 9 11:28:35 2013 -0600
+0.03 2013-09-30
 
-    - use network newlines for auth signature
-
-commit a7c72e9a2ffc4f78b6fcd8a68fd82dc2119ea8ca
-Author: Scott Wiersdorf <scott@betterlinux.com>
-Date:   Fri Nov 16 13:56:23 2012 -0700
-
-    - fix skip test count
-
-commit 98e2189e6737f9b2eee52f223f6ece49b45cbc6b
-Author: Scott Wiersdorf <scott@betterlinux.com>
-Date:   Fri Nov 16 13:53:29 2012 -0700
-
-    - initial commit
+    * First version released to CPAN

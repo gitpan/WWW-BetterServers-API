@@ -8,7 +8,7 @@ use Digest::SHA 'hmac_sha256_hex';
 use Mojo::JSON;
 use Mojo::UserAgent;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 sub new {
     my $class = shift;
