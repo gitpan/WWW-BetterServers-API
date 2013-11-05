@@ -1,5 +1,5 @@
-WWW-BetterServers-API version 0.03
-==================================
+WWW-BetterServers-API
+=====================
 
 WWW::BetterServers::API is an easy-to-use wrapper for the
 BetterServers REST API. Provide the constructor your API id and API
@@ -28,7 +28,7 @@ you can now create, list, destroy your BetterServers VM instances:
         say "Your new server id is " . $resp->json('/id');
     }
 
-INSTALLATION
+## INSTALLATION ##
 
 To install this module type the following:
 
@@ -40,14 +40,14 @@ To install this module type the following:
 See the POD with this module for help running the test with your own
 API credentials.
 
-DEPENDENCIES
+## DEPENDENCIES ##
 
 This module requires these other modules and libraries:
 
   Mojolicious
   IO::Socket::SSL
 
-COPYRIGHT AND LICENCE
+## COPYRIGHT AND LICENCE ##
 
 Copyright (C) 2013 by BetterServers, Inc.
 

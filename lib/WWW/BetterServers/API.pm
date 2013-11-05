@@ -8,7 +8,7 @@ use Digest::SHA 'hmac_sha256_hex';
 use Mojo::JSON;
 use Mojo::UserAgent;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 sub new {
     my $class = shift;
@@ -23,7 +23,7 @@ sub new {
     $self->{api_host} ||= 'api.betterservers.com';
 
     $self->{_ua} = Mojo::UserAgent->new;
-    $self->{_ua}->name("WWW-BetterServers-API/$VERSION");
+    $self->{_ua}->transactor->name("WWW-BetterServers-API/$VERSION");
 
     return $self;
 }

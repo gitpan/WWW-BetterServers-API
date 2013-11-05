@@ -1,7 +1,7 @@
 Changes
 Makefile.PL
 MANIFEST
-README
+README.md
 t/WWW-BetterServers-API.t
 lib/WWW/BetterServers/API.pm
 META.yml                                 Module YAML meta-data (added by MakeMaker)
