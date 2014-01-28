@@ -1,5 +1,9 @@
 Revision history for Perl module WWW::BetterServers::API
 
+0.06 2014-01-27
+
+    * use Mojo::URL
+
 0.05 2013-11-05
 
     * Require Mojolicious 4.50

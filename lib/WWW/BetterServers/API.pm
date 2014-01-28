@@ -6,9 +6,11 @@ use warnings;
 use POSIX 'strftime';
 use Digest::SHA 'hmac_sha256_hex';
 use Mojo::JSON;
+use Mojo::URL;
 use Mojo::UserAgent;
+use Mojo::Util 'encode';
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 sub new {
     my $class = shift;
@@ -37,15 +39,27 @@ sub request {
     my %args = @_;
 
     $args{host}      //= $self->{api_host};
+    $args{port}      //= '';
     $args{api_id}    //= $self->{api_id};
     $args{secret}    //= $self->{api_secret};
     $args{auth_type} //= $self->{auth_type};
-    $args{url}       //= 'https://' . $args{host} . $args{uri};
+    $args{scheme}    //= 'https';
     $args{date}      //= strftime("%a, %d %b %Y %T GMT", gmtime);
     $args{payload}   //= '';
     $args{body}      //= Mojo::JSON->new->encode($args{payload});
 
-    my $req_str = join("\x0d\x0a", @args{qw(method host date uri body)});
+    $args{url}       = Mojo::URL->new();
+    $args{url}->scheme($args{scheme});
+    $args{url}->host($args{host});
+    $args{url}->port($args{port}) if $args{port};
+    $args{url}->path($args{uri});
+
+    my $req_str = join("\x0d\x0a",
+                       encode('UTF-8', $args{method}),
+                       encode('UTF-8', $args{host}),
+                       encode('UTF-8', $args{date}),
+                       encode('UTF-8', $args{url}->path),
+                       $args{body});
 
     my $signature = sub { hmac_sha256_hex( $req_str,
                                            $args{secret} ) }->();
@@ -58,7 +72,7 @@ sub request {
 
     ref($args{pre_hook}) eq 'CODE' && $args{pre_hook}->($self, \%args, $headers);
 
-    my $tx = $self->ua->$sub($args{url},
+    my $tx = $self->ua->$sub($args{url}->to_string,
                              $headers,
                              $args{body},
                              (ref($args{callback}) eq 'CODE' ? $args{callback} : ()));

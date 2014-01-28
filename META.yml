@@ -20,4 +20,4 @@ no_index:
 requires:
   IO::Socket::SSL: 1.75
   Mojolicious: 4.5
-version: 0.05
+version: 0.06
