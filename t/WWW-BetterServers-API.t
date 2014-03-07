@@ -1,8 +1,9 @@
 #-*- mode: cperl -*-#
 use strict;
 use warnings;
+use utf8;
 
-use Test::More tests => 6;
+use Test::More tests => 10;
 BEGIN { use_ok('WWW::BetterServers::API') };
 
 #########################
@@ -13,7 +14,7 @@ my $auth_type = $ENV{AUTH_TYPE};
 my $api_host  = $ENV{API_HOST} || 'api.betterservers.com';
 
 SKIP: {
-    skip("API_ID, API_SECRET, AUTH_TYPE environment vars not set", 5)
+    skip("API_ID, API_SECRET, AUTH_TYPE environment vars not set", 9)
       unless $api_id and $secret and $auth_type;
 
 #    print STDERR "Using $api_id, $secret, $auth_type, $api_host\n";
@@ -31,8 +32,8 @@ SKIP: {
         $api->request(method   => "GET",
                       uri      => "/v1/accounts/$api_id/diskofferings",
                       callback => sub { my ($ua, $tx) = @_;
-                                        is( $tx->res->code, 200, "status good" );
-                                        like( $tx->res->body, qr("storagetype"), "content good" );
+                                        is( $tx->res->code, 200, "200 status good" );
+                                        like( $tx->res->body, qr("storagetype"), "storagetype found" );
                                         $end->() });
     }
 
@@ -41,8 +42,30 @@ SKIP: {
         $api->request(method   => "GET",
                       uri      => "/v1/accounts/$api_id",
                       callback => sub { my ($ua, $tx) = @_;
-                                        is( $tx->res->code, 200, "status good" );
+                                        is( $tx->res->code, 200, "200 status good" );
                                         ok( $tx->res->json('/api_id'), "api id found" );
+                                        $end->() });
+    }
+
+    {
+        my $end = $delay->begin(0);
+        $api->request(method   => "POST",
+                      uri      => "/response_code?code=201",
+                      body     => '{"Mått":"Smîth"}',
+                      callback => sub { my ($ua, $tx) = @_;
+                                        is( $tx->res->code, 201, "201 status good" );
+                                        ok( $tx->res->json('/code'), "code found" );
+                                        $end->() });
+    }
+
+    {
+        my $end = $delay->begin(0);
+        $api->request(method   => "PUT",
+                      uri      => "/response_code?code=202",
+                      payload  => { "Dåvî∂" => 'Ténnånt' },
+                      callback => sub { my ($ua, $tx) = @_;
+                                        is( $tx->res->code, 202, "202 status good" );
+                                        ok( $tx->res->json('/code'), "code found" );
                                         $end->() });
     }
 

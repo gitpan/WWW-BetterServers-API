@@ -10,7 +10,7 @@ use Mojo::URL;
 use Mojo::UserAgent;
 use Mojo::Util 'encode';
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 sub new {
     my $class = shift;
@@ -39,20 +39,17 @@ sub request {
     my %args = @_;
 
     $args{host}      //= $self->{api_host};
-    $args{port}      //= '';
     $args{api_id}    //= $self->{api_id};
     $args{secret}    //= $self->{api_secret};
     $args{auth_type} //= $self->{auth_type};
     $args{scheme}    //= 'https';
     $args{date}      //= strftime("%a, %d %b %Y %T GMT", gmtime);
-    $args{payload}   //= '';
-    $args{body}      //= Mojo::JSON->new->encode($args{payload});
+    $args{body}      //= ($args{payload} ? Mojo::JSON->new->encode($args{payload}) : '');
 
-    $args{url}       = Mojo::URL->new();
+    $args{url} = Mojo::URL->new($args{uri});
     $args{url}->scheme($args{scheme});
     $args{url}->host($args{host});
     $args{url}->port($args{port}) if $args{port};
-    $args{url}->path($args{uri});
 
     my $req_str = join("\x0d\x0a",
                        encode('UTF-8', $args{method}),
@@ -60,6 +57,14 @@ sub request {
                        encode('UTF-8', $args{date}),
                        encode('UTF-8', $args{url}->path),
                        $args{body});
+
+#     say STDERR "url:         " . $args{url}->path;
+#     say STDERR "signed url:  " . hmac_sha256_hex($args{url}->path, $args{secret});
+#     say STDERR "body:        " . $args{body};
+#     say STDERR "signed body: " . hmac_sha256_hex($args{body}, $args{secret});
+#     say STDERR "url + body:  " . hmac_sha256_hex($args{url}->path . $args{body}, $args{secret});
+#     say STDERR "string:      " . $req_str;
+#     say STDERR "signature:   " . hmac_sha256_hex($req_str, $args{secret});
 
     my $signature = sub { hmac_sha256_hex( $req_str,
                                            $args{secret} ) }->();
