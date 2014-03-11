@@ -9,8 +9,11 @@ use Mojo::JSON;
 use Mojo::URL;
 use Mojo::UserAgent;
 use Mojo::Util 'encode';
+use Mojo::Base -base;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
+
+has [qw(api_id api_secret auth_type api_host)];
 
 sub new {
     my $class = shift;
@@ -113,6 +116,9 @@ WWW::BetterServers::API - Perl interface for the BetterServers REST API
   if( $resp->code == 201 ) {
       say "New instance created!\n";
   }
+
+  $api->api_id($api_id);
+  $api->api_secret($secret);
 
   $resp = $api->request(method => "GET",
                         uri    => "/v1/accounts/$api_id/instances");
