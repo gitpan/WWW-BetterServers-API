@@ -8,21 +8,21 @@ BEGIN { use_ok('WWW::BetterServers::API') };
 
 #########################
 
-my $api_id    = $ENV{API_ID};
-my $secret    = $ENV{API_SECRET};
-my $auth_type = $ENV{AUTH_TYPE};
-my $api_host  = $ENV{API_HOST} || 'api.betterservers.com';
+my %cred = (
+    api_id     => $ENV{API_ID},
+    api_secret => $ENV{API_SECRET},
+    auth_type  => $ENV{AUTH_TYPE},
+    api_host   => $ENV{API_HOST} || 'api.betterservers.com',
+    ($ENV{API_PORT} ? (api_port => $ENV{API_PORT}) : ())
+);
+
+my $api_id = $cred{api_id};
 
 SKIP: {
     skip("API_ID, API_SECRET, AUTH_TYPE environment vars not set", 9)
-      unless $api_id and $secret and $auth_type;
+      unless $cred{api_id} and $cred{api_secret} and $cred{auth_type};
 
-#    print STDERR "Using $api_id, $secret, $auth_type, $api_host\n";
-
-    my $api = new WWW::BetterServers::API(api_id     => $api_id,
-                                          api_secret => $secret,
-                                          auth_type  => $auth_type,
-                                          api_host   => $api_host);
+    my $api = new WWW::BetterServers::API(%cred);
 
     ## run (non-blocking) requests in parallel
     my $delay = Mojo::IOLoop->delay;
@@ -32,7 +32,7 @@ SKIP: {
         $api->request(method   => "GET",
                       uri      => "/v1/accounts/$api_id/diskofferings",
                       callback => sub { my ($ua, $tx) = @_;
-                                        is( $tx->res->code, 200, "200 status good" );
+                                        is( $tx->res->code, 200, "200 status good" ) or diag $tx->res->body;
                                         like( $tx->res->body, qr("storagetype"), "storagetype found" );
                                         $end->() });
     }

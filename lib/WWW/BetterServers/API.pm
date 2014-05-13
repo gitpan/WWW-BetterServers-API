@@ -11,9 +11,10 @@ use Mojo::UserAgent;
 use Mojo::Util 'encode';
 use Mojo::Base -base;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
-has [qw(api_id api_secret auth_type api_host)];
+has [qw(api_id api_secret auth_type api_host
+        api_port api_scheme agent)];
 
 sub new {
     my $class = shift;
@@ -21,14 +22,15 @@ sub new {
     bless $self, $class;
 
     my %args = @_;
-    for my $key ( qw(api_id api_secret auth_type api_host) ) {
+    for my $key (qw(api_id api_secret auth_type api_host api_port api_scheme agent)) {
         $self->{$key} = $args{$key} if exists $args{$key};
     }
 
     $self->{api_host} ||= 'api.betterservers.com';
+    $self->{agent}    ||= "WWW-BetterServers-API/$VERSION";
 
     $self->{_ua} = Mojo::UserAgent->new;
-    $self->{_ua}->transactor->name("WWW-BetterServers-API/$VERSION");
+    $self->{_ua}->transactor->name($self->{agent});
 
     return $self;
 }
@@ -45,7 +47,8 @@ sub request {
     $args{api_id}    //= $self->{api_id};
     $args{secret}    //= $self->{api_secret};
     $args{auth_type} //= $self->{auth_type};
-    $args{scheme}    //= 'https';
+    $args{scheme}    //= $self->{api_scheme} // 'https';
+    $args{port}      //= $self->{api_port};
     $args{date}      //= strftime("%a, %d %b %Y %T GMT", gmtime);
     $args{body}      //= ($args{payload} ? Mojo::JSON->new->encode($args{payload}) : '');
 
@@ -61,13 +64,15 @@ sub request {
                        encode('UTF-8', $args{url}->path),
                        $args{body});
 
-#     say STDERR "url:         " . $args{url}->path;
-#     say STDERR "signed url:  " . hmac_sha256_hex($args{url}->path, $args{secret});
-#     say STDERR "body:        " . $args{body};
-#     say STDERR "signed body: " . hmac_sha256_hex($args{body}, $args{secret});
-#     say STDERR "url + body:  " . hmac_sha256_hex($args{url}->path . $args{body}, $args{secret});
-#     say STDERR "string:      " . $req_str;
-#     say STDERR "signature:   " . hmac_sha256_hex($req_str, $args{secret});
+    if ($ENV{BSAPI_AUTH_DEBUG}) {
+        print STDERR "url:         " . $args{url}->path . "\n";
+        print STDERR "signed url:  " . hmac_sha256_hex($args{url}->path, $args{secret}) . "\n";
+        print STDERR "body:        " . $args{body} . "\n";
+        print STDERR "signed body: " . hmac_sha256_hex($args{body}, $args{secret}) . "\n";
+        print STDERR "url + body:  " . hmac_sha256_hex($args{url}->path . $args{body}, $args{secret}) . "\n";
+        print STDERR "string:      " . $req_str . "\n";
+        print STDERR "signature:   " . hmac_sha256_hex($req_str, $args{secret}) . "\n";
+    }
 
     my $signature = sub { hmac_sha256_hex( $req_str,
                                            $args{secret} ) }->();
